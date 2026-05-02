@@ -1,22 +1,25 @@
-export type ListingCategory =
-  | "GROCERIES"
-  | "SUPERMARKET"
-  | "PHARMACY"
-  | "RESTAURANTS"
-  | "FASHION"
-  | "ELECTRONICS"
-  | "HOME"
-  | "HOUSING"
-  | "HEALTH"
-  | "SERVICES";
-
 export type InventoryStatus = "IN_STOCK" | "LOW_STOCK" | "MADE_TO_ORDER";
+
+export type Category = {
+  id: string;
+  name: string;
+  label: string;
+  isSystem: boolean;
+  listingCount: number;
+  createdAt: string;
+};
+
+export type CategoriesResponse = {
+  items: Category[];
+};
 
 export type Listing = {
   id: string;
   title: string;
   description: string;
-  category: ListingCategory;
+  category: string;
+  categoryId: string;
+  categoryLabel: string;
   priceRwf: number;
   unitLabel: string;
   inventoryStatus: InventoryStatus;
@@ -45,62 +48,10 @@ export type ListingsResponse = {
   hasMore: boolean;
 };
 
-export type ListingsQueryResult = ListingsResponse & {
-  source: "live" | "fallback";
-  errorMessage?: string;
-};
-
 export type UserLocation = {
   latitude: number;
   longitude: number;
   accuracy?: number;
-};
-
-export type Merchant = {
-  id: string;
-  businessName: string;
-  ownerName: string;
-  email: string;
-  phone: string;
-  whatsapp?: string | null;
-  businessType: ListingCategory;
-  neighborhood: string;
-  district: string;
-  addressLine?: string | null;
-  description?: string | null;
-  latitude: number;
-  longitude: number;
-  serviceRadiusKm: number;
-  verified: boolean;
-  aiEnabled: boolean;
-};
-
-export type AuthResponse = {
-  token: string;
-  merchant: Merchant;
-};
-
-export type MerchantDashboardResponse = {
-  merchant: Merchant;
-  listings: Array<{
-    id: string;
-    title: string;
-    description: string;
-    category: ListingCategory;
-    priceRwf: number;
-    unitLabel: string;
-    inventoryStatus: InventoryStatus;
-    isFeatured: boolean;
-    freshnessNote?: string | null;
-    tags: string[];
-    createdAt: string;
-  }>;
-  metrics: {
-    totalListings: number;
-    inStock: number;
-    lowStock: number;
-    featured: number;
-  };
 };
 
 export type AiResponse = {
@@ -113,12 +64,31 @@ export type AiResponse = {
     merchant: string;
     neighborhood: string;
     distance: number | null;
-    category: ListingCategory;
+    category: string;
+    categoryLabel?: string;
     unitLabel: string;
     inventoryStatus: InventoryStatus;
     freshnessNote: string | null;
     verified: boolean;
   }>;
   conversationId: string;
-  live?: boolean;
+};
+
+export type NotificationType =
+  | "SELLER_APPROVED"
+  | "SELLER_REJECTED"
+  | "LISTING_CREATED"
+  | "LISTING_LOW_STOCK"
+  | "NEW_SELLER_APPLICATION"
+  | "SYSTEM_ANNOUNCEMENT";
+
+export type Notification = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
 };

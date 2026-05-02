@@ -17,11 +17,11 @@ import { askConcierge } from "../lib/api";
 import type { AiResponse, UserLocation } from "../types";
 
 type AiConciergeProps = {
-  location: UserLocation | null;
-  locationReady: boolean;
+  location?: UserLocation | null;
+  locationReady?: boolean;
 };
 
-export function AiConcierge({ location, locationReady }: AiConciergeProps) {
+export function AiConcierge({ location = null, locationReady = false }: AiConciergeProps) {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
     {
@@ -37,50 +37,44 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
   const [relatedListings, setRelatedListings] = useState<AiResponse["relatedListings"]>([]);
   const [conversationId, setConversationId] = useState<string>();
   const [loading, setLoading] = useState(false);
-  const [aiLive, setAiLive] = useState(true);
 
   async function handleAsk(messageText?: string) {
     const textToSend = messageText || prompt;
-    if (!textToSend.trim()) {
-      return;
-    }
+    if (!textToSend.trim()) return;
 
-    // Add user message
     setMessages((prev) => [...prev, { role: "user", content: textToSend }]);
     setPrompt("");
     setLoading(true);
 
     try {
-      const response: AiResponse = await askConcierge(
+      const response = await askConcierge(
         textToSend,
         location?.latitude,
         location?.longitude,
         conversationId
       );
-      
+
       setMessages((prev) => [...prev, { role: "assistant", content: response.reply }]);
       setSuggestions(response.suggestions);
       setRelatedListings(response.relatedListings);
       setConversationId(response.conversationId);
-      setAiLive(response.live !== false);
-    } catch (error) {
+    } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, I encountered an error. Please try again." }
+        {
+          role: "assistant",
+          content: "Could not reach the AI service. Make sure the backend is running and OPENROUTER_API_KEY is set."
+        }
       ]);
     } finally {
       setLoading(false);
     }
   }
 
-  function handleSuggestionClick(suggestion: string) {
-    handleAsk(suggestion);
-  }
-
-  function handleKeyPress(event: React.KeyboardEvent) {
-    if (event.key === "Enter" && !event.shiftKey) {
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
       event.preventDefault();
-      handleAsk();
+      void handleAsk();
     }
   }
 
@@ -100,38 +94,21 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
           DeepSeek-powered shopping assistant
         </Text>
         <Text color="whiteAlpha.800">
-          Ask me anything about products, prices, or neighborhoods in Kigali.
+          Ask about products, prices, neighborhoods, or nearby alternatives in Kigali.
         </Text>
         <HStack spacing={3} flexWrap="wrap">
           <Badge borderRadius="full" px={3} py={1} bg={locationReady ? "green.500" : "orange.500"}>
-            {locationReady ? "Using your live location" : "Using Kigali fallback area"}
+            {locationReady ? "Using your live location" : "Using Kigali center"}
           </Badge>
-          <Badge borderRadius="full" px={3} py={1} bg={aiLive ? "whiteAlpha.200" : "red.500"}>
-            {aiLive ? "Live AI replies" : "Fallback AI reply"}
+          <Badge borderRadius="full" px={3} py={1} bg="whiteAlpha.200">
+            Live backend replies
           </Badge>
         </HStack>
 
-        <VStack
-          align="stretch"
-          spacing={3}
-          maxH="400px"
-          overflowY="auto"
-          bg="whiteAlpha.50"
-          borderRadius="24px"
-          p={4}
-        >
+        <VStack align="stretch" spacing={3} maxH="400px" overflowY="auto" bg="whiteAlpha.50" borderRadius="24px" p={4}>
           {messages.map((message, index) => (
-            <Box
-              key={index}
-              alignSelf={message.role === "user" ? "flex-end" : "flex-start"}
-              maxW="85%"
-            >
-              <Box
-                bg={message.role === "user" ? "brand.500" : "whiteAlpha.100"}
-                color="white"
-                borderRadius="20px"
-                p={4}
-              >
+            <Box key={`${message.role}-${index}`} alignSelf={message.role === "user" ? "flex-end" : "flex-start"} maxW="85%">
+              <Box bg={message.role === "user" ? "brand.500" : "whiteAlpha.100"} color="white" borderRadius="20px" p={4}>
                 <Text lineHeight="1.6">{message.content}</Text>
               </Box>
             </Box>
@@ -154,11 +131,11 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
               Suggested questions:
             </Text>
             <Wrap spacing={2}>
-              {suggestions.map((suggestion, index) => (
-                <WrapItem key={index}>
+              {suggestions.map((suggestion) => (
+                <WrapItem key={suggestion}>
                   <Badge
                     as="button"
-                    onClick={() => handleSuggestionClick(suggestion)}
+                    onClick={() => void handleAsk(suggestion)}
                     bg="whiteAlpha.100"
                     color="white"
                     borderRadius="full"
@@ -166,7 +143,6 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
                     py={2}
                     cursor="pointer"
                     _hover={{ bg: "whiteAlpha.200" }}
-                    transition="all 0.2s"
                   >
                     {suggestion}
                   </Badge>
@@ -189,36 +165,36 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
                     <Box>
                       <Text fontWeight="700">{listing.title}</Text>
                       <Text fontSize="sm" color="whiteAlpha.800">
-                        {listing.merchant} • {listing.neighborhood}
+                        {listing.merchant} - {listing.neighborhood}
                       </Text>
                     </Box>
-                    {listing.verified ? (
+                    {listing.verified && (
                       <Badge colorScheme="green" borderRadius="full" px={3} py={1}>
                         Verified
                       </Badge>
-                    ) : null}
+                    )}
                   </HStack>
                   <HStack mt={3} spacing={2} flexWrap="wrap">
                     <Badge borderRadius="full" px={3} py={1} bg="brand.500" color="white">
                       {listing.priceRwf.toLocaleString()} RWF / {listing.unitLabel}
                     </Badge>
                     <Badge borderRadius="full" px={3} py={1} bg="whiteAlpha.200">
-                      {listing.category.replace(/_/g, " ")}
+                      {(listing.categoryLabel ?? listing.category).replace(/_/g, " ")}
                     </Badge>
                     <Badge borderRadius="full" px={3} py={1} bg="whiteAlpha.200">
                       {listing.inventoryStatus.replace(/_/g, " ")}
                     </Badge>
-                    {listing.distance !== null ? (
+                    {listing.distance !== null && (
                       <Badge borderRadius="full" px={3} py={1} bg="whiteAlpha.200">
                         {listing.distance.toFixed(1)} km away
                       </Badge>
-                    ) : null}
+                    )}
                   </HStack>
-                  {listing.freshnessNote ? (
+                  {listing.freshnessNote && (
                     <Text mt={2} fontSize="sm" color="orange.100">
                       {listing.freshnessNote}
                     </Text>
-                  ) : null}
+                  )}
                 </Box>
               ))}
             </VStack>
@@ -229,7 +205,7 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
           <Input
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Ask about products, prices, or neighborhoods..."
             bg="whiteAlpha.100"
             borderColor="whiteAlpha.200"
@@ -237,14 +213,14 @@ export function AiConcierge({ location, locationReady }: AiConciergeProps) {
             disabled={loading}
           />
           <Button
-            onClick={() => handleAsk()}
+            onClick={() => void handleAsk()}
             bg="brand.500"
             color="white"
             _hover={{ bg: "brand.600" }}
             px={8}
             rightIcon={<ArrowForwardIcon />}
             isLoading={loading}
-            disabled={!prompt.trim() || loading}
+            isDisabled={!prompt.trim() || loading}
           >
             Ask
           </Button>
