@@ -32,6 +32,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Category, InventoryStatus } from "../types";
 import { useAuth } from "../context/AuthContext";
 
@@ -78,6 +79,7 @@ const emptyMerchantForm = {
 
 export function SellerDashboard() {
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const listingModal = useDisclosure();
 
   const [listings, setListings] = useState<SellerListing[]>([]);
@@ -267,9 +269,14 @@ export function SellerDashboard() {
             <Text color="#6B6B7A" mt={1}>Manage your business profile, categories, listings, and inventory.</Text>
           </Box>
           {isApproved && merchant && (
-            <Button bg="#0F7173" color="white" _hover={{ bg: "#0D5A5C" }} borderRadius="full" onClick={listingModal.onOpen} fontWeight="700" h="48px" px={6}>
-              + New listing
-            </Button>
+            <HStack gap={3}>
+              <Button bg="#0F7173" color="white" _hover={{ bg: "#0D5A5C" }} borderRadius="full" onClick={() => navigate("/seller/market-analysis")} fontWeight="700" h="48px" px={6}>
+                📊 Market Analysis
+              </Button>
+              <Button bg="#0F7173" color="white" _hover={{ bg: "#0D5A5C" }} borderRadius="full" onClick={listingModal.onOpen} fontWeight="700" h="48px" px={6}>
+                + New listing
+              </Button>
+            </HStack>
           )}
         </HStack>
 

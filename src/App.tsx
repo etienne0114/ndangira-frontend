@@ -8,6 +8,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { SellerDashboard } from "./pages/SellerDashboard";
+import { SellerMarketAnalysis } from "./pages/SellerMarketAnalysis";
 
 export default function App() {
   return (
@@ -32,6 +33,14 @@ export default function App() {
               element={
                 <ProtectedRoute roles={["SELLER"]}>
                   <SellerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seller/market-analysis"
+              element={
+                <ProtectedRoute roles={["SELLER"]}>
+                  <SellerMarketAnalysis />
                 </ProtectedRoute>
               }
             />
