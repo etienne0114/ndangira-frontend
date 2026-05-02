@@ -2,41 +2,61 @@ import { extendTheme } from "@chakra-ui/react";
 
 export const theme = extendTheme({
   fonts: {
-    heading: "'Outfit', sans-serif",
-    body: "'Plus Jakarta Sans', sans-serif"
+    heading: "'Poppins', 'Inter', sans-serif",
+    body: "'Inter', 'Poppins', sans-serif",
   },
   colors: {
+    white: "#FFFFFF",
+    black: "#1A1A2E",
+    teal: "#0F7173",
     brand: {
-      50: "#fff7ed",
-      100: "#ffe6cc",
-      200: "#ffc98f",
-      300: "#ffac52",
-      400: "#ff9131",
-      500: "#f97316",
-      600: "#d85f10",
-      700: "#b44b0f",
-      800: "#8c3a12",
-      900: "#733114"
+      500: "#0F7173",
     },
-    ink: {
-      900: "#171717",
-      800: "#262626",
-      700: "#404040"
-    },
-    moss: {
-      500: "#2f855a"
-    },
-    sand: {
-      100: "#f8efe3",
-      200: "#f4e4cf"
-    }
   },
   styles: {
     global: {
       body: {
-        bg: "#f8f3ea",
-        color: "ink.900"
-      }
-    }
-  }
+        bg: "#FFFFFF",
+        color: "#1A1A2E",
+        fontFamily: "'Inter', 'Poppins', sans-serif",
+      },
+      "*": {
+        boxSizing: "border-box",
+      },
+    },
+  },
+  components: {
+    Button: {
+      baseStyle: {
+        fontWeight: "600",
+        borderRadius: "8px",
+        _focus: { boxShadow: "none" },
+      },
+    },
+    Input: {
+      defaultProps: { variant: "outline" },
+      variants: {
+        outline: {
+          field: {
+            borderRadius: "8px",
+            border: "1px solid #1A1A2E",
+            _focus: { borderWidth: "2px", boxShadow: "none", borderColor: "#1A1A2E" },
+          },
+        },
+      },
+    },
+    Select: {
+      defaultProps: { variant: "outline" },
+    },
+    Textarea: {
+      defaultProps: { variant: "outline" },
+      variants: {
+        outline: {
+          borderRadius: "8px",
+          border: "1px solid #1A1A2E",
+          _focus: { borderWidth: "2px", boxShadow: "none", borderColor: "#1A1A2E" },
+        },
+      },
+    },
+  },
 });

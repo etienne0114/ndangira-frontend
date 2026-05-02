@@ -1,130 +1,93 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  HStack,
-  Icon,
-  SimpleGrid,
-  Text,
-  VStack
-} from "@chakra-ui/react";
+import { Badge, Box, Button, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react";
 import { PhoneIcon } from "@chakra-ui/icons";
-import { HiOutlineSparkles } from "react-icons/hi2";
+import { HiCheckCircle, HiPhoto } from "react-icons/hi2";
 import type { Listing } from "../types";
 
-const inventoryTone: Record<Listing["inventoryStatus"], string> = {
-  IN_STOCK: "green",
-  LOW_STOCK: "orange",
-  MADE_TO_ORDER: "purple"
+type ListingCardProps = {
+  listing: Listing;
+  onSelect?: (listing: Listing) => void;
+  selected?: boolean;
 };
 
-export function ListingCard({ listing }: { listing: Listing }) {
+export function ListingCard({ listing, onSelect, selected = false }: ListingCardProps) {
+  const stockBadgeBg = listing.inventoryStatus === "IN_STOCK" ? "teal" : "black";
+
   return (
     <Box
       bg="white"
-      borderRadius="28px"
-      p={6}
-      boxShadow="0 20px 60px rgba(23, 23, 23, 0.08)"
-      border="1px solid rgba(23, 23, 23, 0.06)"
+      border="1px solid"
+      borderColor={selected ? "teal" : "black"}
+      borderRadius="8px"
+      p={4}
+      cursor={onSelect ? "pointer" : "default"}
+      onClick={() => onSelect?.(listing)}
     >
-      <VStack align="stretch" spacing={4}>
-        <HStack justify="space-between" align="start">
-          <VStack align="start" spacing={2}>
-            <Badge colorScheme="orange" borderRadius="full" px={3} py={1}>
-              {listing.category.replace("_", " ")}
+      <HStack align="stretch" spacing={4}>
+        <Box
+          w={{ base: "88px", md: "104px" }}
+          minW={{ base: "88px", md: "104px" }}
+          h={{ base: "88px", md: "104px" }}
+          border="1px solid"
+          borderColor="black"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          {listing.imageUrl ? (
+            <Image src={listing.imageUrl} alt={listing.title} objectFit="cover" w="full" h="full" />
+          ) : (
+            <Icon as={HiPhoto} color="teal" boxSize={8} />
+          )}
+        </Box>
+
+        <VStack align="start" spacing={2} flex="1">
+          <Text fontSize="lg" fontWeight="700" color="black">
+            {listing.title}
+          </Text>
+          <Text fontSize="sm" color="black" opacity={0.65}>
+            {listing.merchant.businessName} • {listing.merchant.neighborhood}
+          </Text>
+          <HStack spacing={2} flexWrap="wrap">
+            <Text fontSize="sm" fontWeight="700" color="teal">
+              {listing.distanceKm ? `${listing.distanceKm.toFixed(1)} km away` : "Nearby"}
+            </Text>
+            <Badge bg={stockBadgeBg} color="white" px={2} py={1} borderRadius="4px">
+              {listing.inventoryStatus === "IN_STOCK" ? "In Stock" : "Low Stock"}
             </Badge>
-            <Text fontSize="xl" fontWeight="800">
-              {listing.title}
-            </Text>
-          </VStack>
-          {listing.isFeatured ? (
-            <Badge colorScheme="yellow" borderRadius="full" px={3} py={1}>
-              Featured
-            </Badge>
-          ) : null}
-        </HStack>
-
-        <Text color="ink.700">{listing.description}</Text>
-
-        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3}>
-          <Box bg="sand.100" borderRadius="20px" p={3}>
-            <Text fontSize="xs" color="ink.700">
-              Price
-            </Text>
-            <Text fontWeight="800">{listing.priceRwf.toLocaleString()} RWF</Text>
-          </Box>
-          <Box bg="sand.100" borderRadius="20px" p={3}>
-            <Text fontSize="xs" color="ink.700">
-              Unit
-            </Text>
-            <Text fontWeight="800">{listing.unitLabel}</Text>
-          </Box>
-          <Box bg="sand.100" borderRadius="20px" p={3}>
-            <Text fontSize="xs" color="ink.700">
-              Distance
-            </Text>
-            <Text fontWeight="800">
-              {listing.distanceKm ? `${listing.distanceKm.toFixed(1)} km` : "Nearby"}
-            </Text>
-          </Box>
-          <Box bg="sand.100" borderRadius="20px" p={3}>
-            <Text fontSize="xs" color="ink.700">
-              Area
-            </Text>
-            <Text fontWeight="800">{listing.merchant.neighborhood}</Text>
-          </Box>
-        </SimpleGrid>
-
-        <HStack spacing={3} flexWrap="wrap">
-          <Badge colorScheme={inventoryTone[listing.inventoryStatus]} borderRadius="full" px={3} py={1}>
-            {listing.inventoryStatus.replace(/_/g, " ")}
-          </Badge>
+            {listing.merchant.verified ? (
+              <HStack spacing={1}>
+                <Icon as={HiCheckCircle} color="teal" boxSize={4} />
+                <Text fontSize="xs" color="teal" fontWeight="600">
+                  Verified
+                </Text>
+              </HStack>
+            ) : null}
+          </HStack>
           {listing.freshnessNote ? (
-            <Badge
-              borderRadius="full"
-              px={3}
-              py={1}
-              bg="brand.50"
-              color="brand.800"
-              display="inline-flex"
-              alignItems="center"
-              gap={1}
-            >
-              <Icon as={HiOutlineSparkles} />
+            <Text fontSize="xs" color="black" opacity={0.65}>
               {listing.freshnessNote}
-            </Badge>
-          ) : null}
-          {listing.merchant.verified ? (
-            <Badge borderRadius="full" px={3} py={1} colorScheme="green">
-              Verified merchant
-            </Badge>
-          ) : null}
-        </HStack>
-
-        <Divider />
-
-        <HStack justify="space-between" align={{ base: "start", md: "center" }} flexWrap="wrap">
-          <VStack align="start" spacing={0}>
-            <Text fontWeight="700">{listing.merchant.businessName}</Text>
-            <Text color="ink.700" fontSize="sm">
-              {listing.merchant.district}, Kigali
             </Text>
-          </VStack>
+          ) : null}
+        </VStack>
+
+        <VStack align="end" spacing={3} minW="120px">
+          <Text fontSize="lg" fontWeight="800" color="black">
+            {listing.priceRwf.toLocaleString()} RWF
+          </Text>
           <Button
             as="a"
             href={`https://wa.me/${(listing.merchant.whatsapp || listing.merchant.phone).replace(/\D/g, "")}`}
             target="_blank"
+            size="sm"
             leftIcon={<PhoneIcon />}
-            bg="ink.900"
+            bg="teal"
             color="white"
-            _hover={{ bg: "ink.800" }}
-            borderRadius="full"
+            borderRadius="8px"
           >
-            Contact seller
+            Message
           </Button>
-        </HStack>
-      </VStack>
+        </VStack>
+      </HStack>
     </Box>
   );
 }
