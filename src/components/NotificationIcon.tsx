@@ -47,6 +47,7 @@ export function NotificationIcon() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
   async function fetchNotifications() {
@@ -57,13 +58,18 @@ export function NotificationIcon() {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!res.ok) throw new Error("Failed to fetch notifications");
+      if (!res.ok) {
+        console.error("Failed to fetch notifications:", res.status);
+        return;
+      }
       
       const data = await res.json();
-      setNotifications(data.items);
-      setUnreadCount(data.unreadCount);
+      setNotifications(data.items || []);
+      setUnreadCount(data.unreadCount || 0);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+    } finally {
+      setInitialLoading(false);
     }
   }
 
@@ -75,10 +81,20 @@ export function NotificationIcon() {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!res.ok) throw new Error("Failed to fetch unread count");
+      if (!res.ok) {
+        console.error("Failed to fetch unread count:", res.status);
+        return;
+      }
       
       const data = await res.json();
-      setUnreadCount(data.count);
+      const newCount = data.count || 0;
+      
+      // If count increased, fetch full notifications to show new ones
+      if (newCount > unreadCount) {
+        void fetchNotifications();
+      } else {
+        setUnreadCount(newCount);
+      }
     } catch (error) {
       console.error("Failed to fetch unread count:", error);
     }
@@ -185,6 +201,8 @@ export function NotificationIcon() {
       }, 30000);
       
       return () => clearInterval(interval);
+    } else {
+      setInitialLoading(false);
     }
   }, [user, token]);
 
@@ -259,9 +277,16 @@ export function NotificationIcon() {
 
         {notifications.length === 0 ? (
           <Box p={8} textAlign="center">
-            <Text color="gray.500" fontSize="sm">
-              No notifications yet
-            </Text>
+            {initialLoading ? (
+              <Spinner size="md" color="brand.500" />
+            ) : (
+              <>
+                <Text fontSize="3xl" mb={2}>🔔</Text>
+                <Text color="gray.500" fontSize="sm">
+                  No notifications yet
+                </Text>
+              </>
+            )}
           </Box>
         ) : (
           <VStack spacing={0} align="stretch">
