@@ -24,9 +24,14 @@ export function AiConcierge() {
     }
 
     setLoading(true);
-    const nextReply = await askConcierge(prompt);
-    setReply(nextReply);
-    setLoading(false);
+    try {
+      const nextReply = await askConcierge(prompt);
+      setReply(nextReply);
+    } catch {
+      setReply("Could not reach the AI service. Make sure the backend is running and OPENROUTER_API_KEY is set.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

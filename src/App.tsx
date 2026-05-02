@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Badge,
   Box,
   Button,
@@ -8,6 +11,8 @@ import {
   GridItem,
   HStack,
   Input,
+  InputGroup,
+  InputLeftElement,
   Select,
   SimpleGrid,
   Skeleton,
@@ -19,23 +24,12 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { ArrowForwardIcon, SearchIcon } from "@chakra-ui/icons";
 import { SectionHeading } from "./components/SectionHeading";
 import { ListingCard } from "./components/ListingCard";
 import { AiConcierge } from "./components/AiConcierge";
-import { fetchListings } from "./lib/api";
-import type { Listing } from "./types";
-
-const categories = [
-  { label: "All categories", value: "" },
-  { label: "Groceries", value: "GROCERIES" },
-  { label: "Restaurants", value: "RESTAURANTS" },
-  { label: "Fashion", value: "FASHION" },
-  { label: "Electronics", value: "ELECTRONICS" },
-  { label: "Home", value: "HOME" },
-  { label: "Health", value: "HEALTH" },
-  { label: "Services", value: "SERVICES" }
-];
+import { fetchCategories, fetchListings } from "./lib/api";
+import type { Category, Listing } from "./types";
 
 const featureBlocks = [
   {
@@ -53,28 +47,55 @@ const featureBlocks = [
 ];
 
 function App() {
-  const [query, setQuery] = useState("fresh");
-  const [category, setCategory] = useState("");
-  const [items, setItems] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Search bar controlled value (not yet submitted)
+  const [inputValue, setInputValue] = useState("fresh");
+  // What was last submitted to the API
+  const [submittedQuery, setSubmittedQuery] = useState("fresh");
 
+  const [category, setCategory] = useState("");
+
+  // Categories from API
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(false);
+
+  // Listings from API
+  const [items, setItems] = useState<Listing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingsError, setListingsError] = useState<string | null>(null);
+
+  // Load categories once on mount
+  useEffect(() => {
+    fetchCategories()
+      .then((data) => setCategories(data.items))
+      .catch(() => setCategoriesError(true))
+      .finally(() => setCategoriesLoading(false));
+  }, []);
+
+  // Reload listings whenever submitted query or category changes
   useEffect(() => {
     const params = new URLSearchParams();
-    if (query) {
-      params.set("q", query);
-    }
-    if (category) {
-      params.set("category", category);
-    }
+    if (submittedQuery) params.set("q", submittedQuery);
+    if (category) params.set("category", category);
     params.set("lat", "-1.9441");
     params.set("lng", "30.0619");
     params.set("sort", "distance");
 
-    setLoading(true);
+    setListingsLoading(true);
+    setListingsError(null);
+
     fetchListings(params)
       .then((data) => setItems(data.items))
-      .finally(() => setLoading(false));
-  }, [query, category]);
+      .catch(() => {
+        setListingsError("Could not reach the server. Make sure the backend is running on port 4000.");
+        setItems([]);
+      })
+      .finally(() => setListingsLoading(false));
+  }, [submittedQuery, category]);
+
+  function handleSearch() {
+    setSubmittedQuery(inputValue.trim());
+  }
 
   const featured = useMemo(() => items.filter((item) => item.isFeatured), [items]);
 
@@ -82,6 +103,8 @@ function App() {
     <Box minH="100vh" bgGradient="linear(to-b, #f8f3ea 0%, #fffdf9 45%, #f2ebde 100%)">
       <Container maxW="7xl" py={{ base: 6, md: 10 }}>
         <VStack align="stretch" spacing={{ base: 10, md: 16 }}>
+
+          {/* ── Hero ──────────────────────────────────────────────── */}
           <Box
             borderRadius="36px"
             bgGradient="linear(to-br, brand.500, ink.900)"
@@ -99,8 +122,8 @@ function App() {
                   Find what you need near you, not across the city.
                 </Text>
                 <Text color="whiteAlpha.900" maxW="2xl" fontSize={{ base: "md", md: "lg" }}>
-                  Ndangira helps Kigali shoppers discover real nearby products and services, while local businesses
-                  turn current location into a live digital storefront.
+                  Ndangira helps Kigali shoppers discover real nearby products and services, while
+                  local businesses turn current location into a live digital storefront.
                 </Text>
                 <HStack spacing={4} flexWrap="wrap">
                   <Button
@@ -138,7 +161,7 @@ function App() {
                     <StatLabel color="whiteAlpha.700">Search lift</StatLabel>
                     <StatNumber>3x</StatNumber>
                     <StatHelpText color="whiteAlpha.700">
-                      “Near me” intent is growing and Ndangira is built directly for it.
+                      "Near me" intent is growing and Ndangira is built directly for it.
                     </StatHelpText>
                   </Stat>
                   <Stat bg="whiteAlpha.100" borderRadius="24px" p={4}>
@@ -160,6 +183,7 @@ function App() {
             </Stack>
           </Box>
 
+          {/* ── Feature highlights ────────────────────────────────── */}
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
             {featureBlocks.map((block) => (
               <Box
@@ -178,12 +202,15 @@ function App() {
             ))}
           </SimpleGrid>
 
+          {/* ── Discovery section ─────────────────────────────────── */}
           <VStack align="stretch" spacing={6}>
             <SectionHeading
               eyebrow="Discovery Engine"
               title="Neighborhood-first search"
               description="A stronger, more competitive discovery experience with location-aware filters, urgency cues, and quick seller contact."
             />
+
+            {/* Search bar */}
             <Box
               bg="white"
               borderRadius="30px"
@@ -191,65 +218,155 @@ function App() {
               border="1px solid rgba(23, 23, 23, 0.06)"
             >
               <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search tomatoes, tailoring, speaker, salon..."
+                {/* Text search with icon */}
+                <InputGroup h="56px">
+                  <InputLeftElement h="56px" pointerEvents="none">
+                    <SearchIcon color="ink.700" />
+                  </InputLeftElement>
+                  <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    placeholder="Search tomatoes, tailoring, speaker…"
+                    borderRadius="full"
+                    h="56px"
+                    pl="44px"
+                  />
+                </InputGroup>
+
+                {/* Category select — live from API */}
+                {categoriesLoading ? (
+                  <Skeleton h="56px" borderRadius="full" />
+                ) : (
+                  <Select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    borderRadius="full"
+                    h="56px"
+                    isDisabled={categoriesError}
+                    placeholder={categoriesError ? "Categories unavailable" : undefined}
+                  >
+                    <option value="">All categories</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.label}
+                        {cat.listingCount > 0 ? ` (${cat.listingCount})` : ""}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+
+                {/* Search button */}
+                <Button
+                  onClick={handleSearch}
+                  leftIcon={<SearchIcon />}
                   borderRadius="full"
                   h="56px"
-                />
-                <Select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  borderRadius="full"
-                  h="56px"
+                  bg="brand.500"
+                  color="white"
+                  _hover={{ bg: "brand.600" }}
+                  isLoading={listingsLoading}
+                  loadingText="Searching…"
                 >
-                  {categories.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-                <Button borderRadius="full" h="56px" bg="brand.500" color="white" _hover={{ bg: "brand.600" }}>
-                  Refresh nearby results
+                  Search nearby
                 </Button>
               </SimpleGrid>
             </Box>
 
+            {/* Listings grid + sidebar */}
             <Grid templateColumns={{ base: "1fr", xl: "2fr 1fr" }} gap={8}>
               <GridItem>
                 <VStack align="stretch" spacing={5}>
-                  {loading
-                    ? Array.from({ length: 3 }).map((_, index) => (
-                        <Skeleton key={index} h="220px" borderRadius="28px" />
-                      ))
-                    : items.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
+                  {/* Error state */}
+                  {listingsError && (
+                    <Alert status="error" borderRadius="28px" border="1px solid" borderColor="red.200">
+                      <AlertIcon />
+                      <AlertDescription>{listingsError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Loading skeletons */}
+                  {listingsLoading &&
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} h="220px" borderRadius="28px" />
+                    ))}
+
+                  {/* Empty state */}
+                  {!listingsLoading && !listingsError && items.length === 0 && (
+                    <Box
+                      bg="white"
+                      borderRadius="28px"
+                      p={10}
+                      textAlign="center"
+                      border="1px solid rgba(23, 23, 23, 0.06)"
+                    >
+                      <Text fontSize="xl" fontWeight="800" mb={2}>
+                        No listings found
+                      </Text>
+                      <Text color="ink.700">
+                        Try a different search term or select another category.
+                      </Text>
+                    </Box>
+                  )}
+
+                  {/* Results */}
+                  {!listingsLoading &&
+                    items.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
                 </VStack>
               </GridItem>
+
               <GridItem>
                 <VStack align="stretch" spacing={6}>
                   <AiConcierge />
-                  <Box bg="white" borderRadius="28px" p={6} border="1px solid rgba(23, 23, 23, 0.06)">
+
+                  {/* Featured today sidebar */}
+                  <Box
+                    bg="white"
+                    borderRadius="28px"
+                    p={6}
+                    border="1px solid rgba(23, 23, 23, 0.06)"
+                  >
                     <Text fontSize="lg" fontWeight="800" mb={4}>
                       Featured today
                     </Text>
-                    <VStack align="stretch" spacing={4}>
-                      {featured.slice(0, 3).map((item) => (
-                        <Box key={item.id} bg="sand.100" borderRadius="22px" p={4}>
-                          <Text fontWeight="700">{item.title}</Text>
-                          <Text fontSize="sm" color="ink.700">
-                            {item.merchant.neighborhood} • {item.priceRwf.toLocaleString()} RWF
-                          </Text>
-                        </Box>
-                      ))}
-                    </VStack>
+                    {featured.length === 0 ? (
+                      <Text color="ink.700" fontSize="sm">
+                        No featured listings right now.
+                      </Text>
+                    ) : (
+                      <VStack align="stretch" spacing={4}>
+                        {featured.slice(0, 3).map((item) => (
+                          <Box key={item.id} bg="sand.100" borderRadius="22px" p={4}>
+                            <Text fontWeight="700">{item.title}</Text>
+                            <Text fontSize="sm" color="ink.700">
+                              {item.merchant.neighborhood} • {item.priceRwf.toLocaleString()} RWF
+                            </Text>
+                            <Badge
+                              mt={1}
+                              colorScheme="orange"
+                              borderRadius="full"
+                              fontSize="xs"
+                              px={2}
+                            >
+                              {item.categoryLabel}
+                            </Badge>
+                          </Box>
+                        ))}
+                      </VStack>
+                    )}
                   </Box>
                 </VStack>
               </GridItem>
             </Grid>
           </VStack>
 
-          <Box bg="white" borderRadius="34px" p={{ base: 6, md: 8 }} border="1px solid rgba(23, 23, 23, 0.06)">
+          {/* ── Innovation layer ──────────────────────────────────── */}
+          <Box
+            bg="white"
+            borderRadius="34px"
+            p={{ base: 6, md: 8 }}
+            border="1px solid rgba(23, 23, 23, 0.06)"
+          >
             <SectionHeading
               eyebrow="Innovation Layer"
               title="What makes Ndangira more professional and competitive"
@@ -268,6 +385,7 @@ function App() {
               ))}
             </SimpleGrid>
           </Box>
+
         </VStack>
       </Container>
     </Box>
