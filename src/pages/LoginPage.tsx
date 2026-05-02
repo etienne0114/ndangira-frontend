@@ -39,16 +39,28 @@ export function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
-      const data = (await res.json()) as { token?: string; user?: AuthUser; message?: string };
+      const data = (await res.json()) as { 
+        token?: string; 
+        user?: AuthUser; 
+        message?: string;
+        errors?: Array<{ path: string[]; message: string }>;
+      };
       if (!res.ok) {
-        setError(data.message ?? "Login failed.");
+        // Handle Zod validation errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors.map(err => err.message).join(", ");
+          setError(errorMessages);
+        } else {
+          setError(data.message ?? "Login failed.");
+        }
         return;
       }
       login(data.token!, data.user!);
       if (data.user!.role === "ADMIN") navigate("/admin");
       else if (data.user!.role === "SELLER") navigate("/seller");
       else navigate("/");
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Could not reach the server. Make sure the backend is running.");
     } finally {
       setLoading(false);
