@@ -220,23 +220,24 @@ function HeroBand({
 /* ── Filter Sidebar ───────────────────────────────────────────────────────── */
 function FilterSidebar({ filters, onChange }: { filters: FilterState; onChange: (f: FilterState) => void }) {
   return (
-    <Box as="aside" w="260px" flexShrink={0} px="24px" py="28px"
-      borderRight={`1px solid ${TT.black}`} display="flex" flexDirection="column"
-      gap="24px" overflowY="auto">
+    <Box as="aside" w="280px" flexShrink={0} px="24px" py="28px"
+      borderRight={`2px solid ${TT.black}`} display="flex" flexDirection="column"
+      gap="28px" overflowY="auto" bg="white">
 
       {/* Distance */}
       <Box>
-        <Text fontSize="11px" fontWeight="700" letterSpacing="0.06em" textTransform="uppercase"
-          color={TT.muted} mb="10px" fontFamily="'Inter',sans-serif">Distance</Text>
-        <HStack border={`1px solid ${TT.black}`} borderRadius="8px" overflow="hidden" spacing={0}>
+        <Text fontSize="11px" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase"
+          color={TT.black} mb="14px" fontFamily="'Inter',sans-serif">📍 Distance</Text>
+        <HStack border={`2px solid ${TT.black}`} borderRadius="8px" overflow="hidden" spacing={0}>
           {DISTANCE_OPTS.map((o, i) => (
-            <Box key={o.value} as="button" flex={1} py="8px" textAlign="center" cursor="pointer"
-              fontSize="11px" fontFamily="'Inter',sans-serif"
-              fontWeight={filters.maxDistanceKm===o.value ? "700" : "500"}
+            <Box key={o.value} as="button" flex={1} py="10px" textAlign="center" cursor="pointer"
+              fontSize="12px" fontFamily="'Inter',sans-serif" fontWeight="600"
               bg={filters.maxDistanceKm===o.value ? TT.teal : TT.white}
               color={filters.maxDistanceKm===o.value ? TT.white : TT.black}
-              borderLeft={i===0 ? "none" : `1px solid ${TT.black}`} border="none"
+              borderLeft={i===0 ? "none" : `2px solid ${TT.black}`} border="none"
               onClick={() => onChange({ ...filters, maxDistanceKm: o.value })}
+              transition="all 0.2s"
+              _hover={{ opacity: 0.8 }}
               style={{outline:"none"}}>{o.label}</Box>
           ))}
         </HStack>
@@ -244,16 +245,19 @@ function FilterSidebar({ filters, onChange }: { filters: FilterState; onChange: 
 
       {/* Category */}
       <Box>
-        <Text fontSize="11px" fontWeight="700" letterSpacing="0.06em" textTransform="uppercase"
-          color={TT.muted} mb="10px" fontFamily="'Inter',sans-serif">Category</Text>
-        <VStack align="stretch" spacing="1px">
+        <Text fontSize="11px" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase"
+          color={TT.black} mb="14px" fontFamily="'Inter',sans-serif">🏪 Category</Text>
+        <VStack align="stretch" spacing="2px">
           {CATEGORIES.map((c) => (
-            <Box key={c.value} as="button" px="10px" py="7px" borderRadius="6px" fontSize="14px"
-              fontFamily="'Inter',sans-serif" textAlign="left" cursor="pointer" bg="transparent" border="none"
+            <Box key={c.value} as="button" px="12px" py="10px" borderRadius="8px" fontSize="14px"
+              fontFamily="'Inter',sans-serif" textAlign="left" cursor="pointer" 
+              bg={filters.category===c.value ? "#E0F2F1" : "transparent"} 
+              border={`2px solid ${filters.category===c.value ? TT.teal : "transparent"}`}
               fontWeight={filters.category===c.value ? "700" : "500"}
               color={filters.category===c.value ? TT.teal : TT.black}
-              borderLeft={`2px solid ${filters.category===c.value ? TT.teal : "transparent"}`}
               onClick={() => onChange({ ...filters, category: c.value })}
+              transition="all 0.2s"
+              _hover={{ bg: "#F3F4F6", borderColor: TT.teal }}
               style={{outline:"none"}}>{c.label}</Box>
           ))}
         </VStack>
@@ -261,17 +265,18 @@ function FilterSidebar({ filters, onChange }: { filters: FilterState; onChange: 
 
       {/* Availability */}
       <Box>
-        <Text fontSize="11px" fontWeight="700" letterSpacing="0.06em" textTransform="uppercase"
-          color={TT.muted} mb="10px" fontFamily="'Inter',sans-serif">Availability</Text>
-        <HStack border={`1px solid ${TT.black}`} borderRadius="8px" overflow="hidden" spacing={0}>
+        <Text fontSize="11px" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase"
+          color={TT.black} mb="14px" fontFamily="'Inter',sans-serif">📦 Availability</Text>
+        <HStack border={`2px solid ${TT.black}`} borderRadius="8px" overflow="hidden" spacing={0}>
           {STOCK_OPTS.map((o, i) => (
-            <Box key={o.value} as="button" flex={1} py="8px" textAlign="center" cursor="pointer"
-              fontSize="12px" fontFamily="'Inter',sans-serif"
-              fontWeight={filters.stock===o.value ? "700" : "500"}
+            <Box key={o.value} as="button" flex={1} py="10px" textAlign="center" cursor="pointer"
+              fontSize="12px" fontFamily="'Inter',sans-serif" fontWeight="600"
               bg={filters.stock===o.value ? TT.teal : TT.white}
               color={filters.stock===o.value ? TT.white : TT.black}
-              borderLeft={i===0 ? "none" : `1px solid ${TT.black}`} border="none"
+              borderLeft={i===0 ? "none" : `2px solid ${TT.black}`} border="none"
               onClick={() => onChange({ ...filters, stock: o.value })}
+              transition="all 0.2s"
+              _hover={{ opacity: 0.8 }}
               style={{outline:"none"}}>{o.label}</Box>
           ))}
         </HStack>
@@ -279,18 +284,22 @@ function FilterSidebar({ filters, onChange }: { filters: FilterState; onChange: 
 
       {/* Verified Only toggle */}
       <Box>
-        <Text fontSize="11px" fontWeight="700" letterSpacing="0.06em" textTransform="uppercase"
-          color={TT.muted} mb="10px" fontFamily="'Inter',sans-serif">Verified Sellers</Text>
-        <HStack spacing="10px" cursor="pointer"
+        <Text fontSize="11px" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase"
+          color={TT.black} mb="14px" fontFamily="'Inter',sans-serif">✓ Verified Sellers</Text>
+        <HStack spacing="12px" cursor="pointer" p="12px" borderRadius="8px" 
+          bg={filters.verifiedOnly ? "#E0F2F1" : "#F3F4F6"}
+          border={`2px solid ${filters.verifiedOnly ? TT.teal : "#E5E7EB"}`}
+          transition="all 0.2s"
+          _hover={{ borderColor: TT.teal }}
           onClick={() => onChange({ ...filters, verifiedOnly: !filters.verifiedOnly })}>
-          <Box w="36px" h="20px" bg={filters.verifiedOnly ? TT.teal : TT.muted} borderRadius="999px"
-            position="relative" flexShrink={0} transition="background 0.15s">
-            <Box position="absolute" right={filters.verifiedOnly ? "2px" : "auto"}
-              left={filters.verifiedOnly ? "auto" : "2px"} top="2px" w="16px" h="16px"
-              bg={TT.white} borderRadius="999px" transition="all 0.15s" />
+          <Box w="40px" h="24px" bg={filters.verifiedOnly ? TT.teal : "#D1D5DB"} borderRadius="999px"
+            position="relative" flexShrink={0} transition="background 0.2s">
+            <Box position="absolute" right={filters.verifiedOnly ? "3px" : "auto"}
+              left={filters.verifiedOnly ? "auto" : "3px"} top="3px" w="18px" h="18px"
+              bg={TT.white} borderRadius="999px" transition="all 0.2s" boxShadow="0 2px 4px rgba(0,0,0,0.1)" />
           </Box>
-          <Text fontSize="13px" fontFamily="'Inter',sans-serif" color={TT.black}>
-            {filters.verifiedOnly ? "Verified only" : "Show all sellers"}
+          <Text fontSize="13px" fontFamily="'Inter',sans-serif" color={TT.black} fontWeight="600">
+            {filters.verifiedOnly ? "Verified only" : "Show all"}
           </Text>
         </HStack>
       </Box>
@@ -303,58 +312,64 @@ function ProductCard({ listing, onClick }: { listing: Listing; onClick?: () => v
   const isInStock = listing.inventoryStatus === "IN_STOCK";
   const waNum = (listing.merchant.whatsapp || listing.merchant.phone).replace(/\D/g, "");
   return (
-    <Box border={`1px solid ${TT.black}`} borderRadius="8px" overflow="hidden" bg={TT.white}
-      display="flex" flexDirection="column" cursor="pointer" transition="opacity 0.12s"
-      _hover={{ opacity: 0.92 }} onClick={onClick}>
+    <Box border={`2px solid ${TT.black}`} borderRadius="12px" overflow="hidden" bg={TT.white}
+      display="flex" flexDirection="column" cursor="pointer" transition="all 0.2s"
+      _hover={{ borderColor: TT.teal, boxShadow: "0 8px 24px rgba(15,113,115,0.15)", transform: "translateY(-4px)" }} 
+      onClick={onClick}>
       {/* Image */}
-      <Box h="180px" bg={TT.black} position="relative" display="flex" alignItems="center"
+      <Box h="200px" bg={TT.black} position="relative" display="flex" alignItems="center"
         justifyContent="center" overflow="hidden" flexShrink={0}>
         {listing.imageUrl
           ? <Box as="img" src={listing.imageUrl} alt={listing.title} w="full" h="full" style={{objectFit:"cover"}} />
-          : <Icon as={HiPhoto} boxSize="28px" color="rgba(255,255,255,0.15)" />
+          : <Icon as={HiPhoto} boxSize="40px" color="rgba(255,255,255,0.2)" />
         }
         {/* Stock badge */}
         <Box position="absolute" top="12px" left="12px"
-          display="inline-flex" alignItems="center" h="22px" px="8px"
-          fontSize="10px" fontWeight="600" letterSpacing="0.04em" textTransform="uppercase"
-          borderRadius="4px" bg={isInStock ? TT.teal : TT.black} color={TT.white}>
+          display="inline-flex" alignItems="center" h="24px" px="10px"
+          fontSize="11px" fontWeight="700" letterSpacing="0.05em" textTransform="uppercase"
+          borderRadius="6px" bg={isInStock ? "#10B981" : isInStock === false && listing.inventoryStatus === "LOW_STOCK" ? "#D97706" : "#3B82F6"} color={TT.white}
+          boxShadow="0 2px 8px rgba(0,0,0,0.2)">
           {isInStock ? "In Stock" : listing.inventoryStatus === "LOW_STOCK" ? "Low Stock" : "Made to Order"}
         </Box>
       </Box>
       {/* Details */}
-      <Box p="16px" display="flex" flexDirection="column" gap="5px" flex={1}>
-        <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="15px"
+      <Box p="16px" display="flex" flexDirection="column" gap="6px" flex={1}>
+        <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="16px"
           color={TT.black} lineHeight="1.3" noOfLines={2}>{listing.title}</Text>
-        <Text color={TT.muted} fontSize="13px" noOfLines={1}>
+        <Text color={TT.muted} fontSize="13px" noOfLines={1} fontWeight="500">
           {listing.merchant.businessName} · {listing.merchant.neighborhood}
         </Text>
         {listing.merchant.verified && (
           <HStack spacing="4px" mt="2px">
-            <Icon as={LuCircleCheck} boxSize="12px" color={TT.teal} />
-            <Text fontSize="11px" color={TT.teal} fontWeight="600">Verified</Text>
+            <Icon as={LuCircleCheck} boxSize="13px" color={TT.teal} />
+            <Text fontSize="11px" color={TT.teal} fontWeight="700">Verified Seller</Text>
           </HStack>
         )}
         {listing.freshnessNote && (
-          <Text fontSize="11px" color={TT.muted} noOfLines={1}>{listing.freshnessNote}</Text>
+          <Text fontSize="11px" color={TT.teal} noOfLines={1} fontWeight="500">🕐 {listing.freshnessNote}</Text>
         )}
-        <HStack mt="auto" justify="space-between" alignItems="baseline" pt="10px">
-          <Text color={TT.teal} fontWeight="700" fontSize="13px">
-            {listing.distanceKm != null ? `${listing.distanceKm.toFixed(1)} km away` : "Nearby"}
-          </Text>
-          <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="17px" color={TT.black}>
+        <HStack mt="auto" justify="space-between" alignItems="baseline" pt="12px" borderTop={`1px solid #E5E7EB`}>
+          <HStack spacing="2px">
+            <Icon as={LuMapPin} boxSize="14px" color={TT.teal} />
+            <Text color={TT.teal} fontWeight="700" fontSize="13px">
+              {listing.distanceKm != null ? `${listing.distanceKm.toFixed(1)} km` : "Nearby"}
+            </Text>
+          </HStack>
+          <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="18px" color={TT.black}>
             {fmt(listing.priceRwf)}
           </Text>
         </HStack>
-        {/* WhatsApp CTA */}
+        {/* WhatsApp CTA - clickable but doesn't close card */}
         <Box
           as="a" href={`https://wa.me/${waNum}`} target="_blank" rel="noopener noreferrer"
-          mt="10px" h="36px" w="full" borderRadius="6px" bg={TT.teal} color={TT.white}
+          mt="12px" h="40px" w="full" borderRadius="8px" bg={TT.teal} color={TT.white}
           display="flex" alignItems="center" justifyContent="center"
-          fontSize="13px" fontWeight="600" fontFamily="'Inter',sans-serif"
+          fontSize="13px" fontWeight="700" fontFamily="'Inter',sans-serif"
           textDecoration="none" onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          _hover={{ opacity: 0.9 }}
+          _hover={{ bg: "#0D5A5C", transform: "scale(1.02)" }}
+          transition="all 0.2s"
         >
-          Message Seller
+          💬 Message Seller
         </Box>
       </Box>
     </Box>
@@ -362,77 +377,144 @@ function ProductCard({ listing, onClick }: { listing: Listing; onClick?: () => v
 }
 
 /* ── Product Detail Sheet ─────────────────────────────────────────────────── */
-function DetailSheet({ listing, onClose }: { listing: Listing; onClose: () => void }) {
+function DetailSheet({ listing, onClose, userLocation }: { listing: Listing; onClose: () => void; userLocation: UserLocation }) {
   const waNum = (listing.merchant.whatsapp || listing.merchant.phone).replace(/\D/g, "");
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${listing.merchant.latitude},${listing.merchant.longitude}`;
+  
   return (
     <Box
       position="fixed" inset={0} zIndex={50} display="flex" alignItems="flex-end"
-      bg="rgba(26,26,46,0.5)" onClick={onClose}
+      bg="rgba(26,26,46,0.6)" onClick={onClose}
     >
       <Box
-        bg={TT.white} w="full" maxH="90vh" borderRadius="16px 16px 0 0"
+        bg={TT.white} w="full" maxH="90vh" borderRadius="20px 20px 0 0"
         overflow="auto" onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
-        {/* Black header */}
-        <Box bg={TT.black} color={TT.white} px="24px" py="20px" position="sticky" top={0}>
-          <HStack justify="space-between">
-            <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="18px">
-              {listing.title}
+        {/* Teal header */}
+        <Box bg={TT.teal} color={TT.white} px="24px" py="20px" position="sticky" top={0} borderBottom={`2px solid ${TT.black}`}>
+          <HStack justify="space-between" align="center">
+            <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="20px">
+              📦 {listing.title}
             </Text>
-            <Box as="button" bg="transparent" border="none" cursor="pointer" color={TT.white}
-              onClick={onClose} style={{outline:"none"}}>
-              <Icon as={LuX} boxSize="22px" />
+            <Box as="button" bg="white" border="none" cursor="pointer" color={TT.teal}
+              onClick={onClose} style={{outline:"none"}} w="36px" h="36px" borderRadius="999px"
+              display="flex" alignItems="center" justifyContent="center" fontWeight="700">
+              ✕
             </Box>
           </HStack>
         </Box>
-        <Box px="24px" py="20px" display="flex" flexDirection="column" gap="16px">
+        <Box px="24px" py="24px" display="flex" flexDirection="column" gap="20px">
           {/* Image */}
-          <Box h="220px" bg={TT.black} borderRadius="8px" overflow="hidden" display="flex" alignItems="center" justifyContent="center">
+          <Box h="240px" bg={TT.black} borderRadius="12px" overflow="hidden" display="flex" alignItems="center" justifyContent="center" border={`2px solid ${TT.black}`}>
             {listing.imageUrl
               ? <Box as="img" src={listing.imageUrl} alt={listing.title} w="full" h="full" style={{objectFit:"cover"}} />
-              : <Icon as={HiPhoto} boxSize="40px" color="rgba(255,255,255,0.2)" />
+              : <Icon as={HiPhoto} boxSize="48px" color="rgba(255,255,255,0.2)" />
             }
           </Box>
-          {/* Price */}
-          <HStack justify="space-between" alignItems="baseline">
-            <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="28px" color={TT.teal}>
-              {fmt(listing.priceRwf)}
-            </Text>
-            <Text fontSize="14px" color={TT.muted}>per {listing.unitLabel}</Text>
-          </HStack>
-          {/* Description */}
-          <Text fontSize="15px" color={TT.black} lineHeight="1.6">{listing.description}</Text>
-          {/* Merchant info */}
-          <Box border={`1px solid ${TT.black}`} borderRadius="8px" p="16px">
-            <HStack justify="space-between">
-              <Box>
-                <HStack spacing="6px">
-                  <Text fontWeight="700" fontSize="15px">{listing.merchant.businessName}</Text>
-                  {listing.merchant.verified && <Icon as={LuCircleCheck} boxSize="14px" color={TT.teal} />}
-                </HStack>
-                <Text fontSize="13px" color={TT.muted} mt="2px">
-                  {listing.merchant.neighborhood}, {listing.merchant.district}
-                </Text>
-              </Box>
-              <Text fontWeight="700" fontSize="15px" color={TT.teal}>
-                {listing.distanceKm != null ? `${listing.distanceKm.toFixed(1)} km` : "Nearby"}
+          
+          {/* Price & Category */}
+          <Box>
+            <HStack justify="space-between" alignItems="baseline" mb={3}>
+              <Text fontFamily="'Poppins',sans-serif" fontWeight="700" fontSize="32px" color={TT.teal}>
+                {fmt(listing.priceRwf)}
               </Text>
+              <Text fontSize="15px" color={TT.muted} fontWeight="600">per {listing.unitLabel}</Text>
+            </HStack>
+            <HStack spacing={2} flexWrap="wrap">
+              <Box bg={TT.teal} color="white" px={3} py={1} borderRadius="full" fontSize="12px" fontWeight="700">
+                {listing.categoryLabel}
+              </Box>
+              <Box bg={listing.inventoryStatus === "IN_STOCK" ? "#E0F2F1" : "#FEF3C7"} 
+                color={listing.inventoryStatus === "IN_STOCK" ? TT.teal : "#92400E"} 
+                px={3} py={1} borderRadius="full" fontSize="12px" fontWeight="700">
+                {listing.inventoryStatus.replace(/_/g, " ")}
+              </Box>
             </HStack>
           </Box>
+
+          {/* Description */}
+          <Box>
+            <Text fontSize="13px" fontWeight="700" color={TT.black} mb={2} letterSpacing="0.05em" textTransform="uppercase">Description</Text>
+            <Text fontSize="15px" color={TT.black} lineHeight="1.7">{listing.description}</Text>
+          </Box>
+
+          {/* Merchant info with location */}
+          <Box border={`2px solid ${TT.black}`} borderRadius="12px" p="16px" bg="#F3F4F6">
+            <HStack justify="space-between" align="start" mb={3}>
+              <Box>
+                <HStack spacing="6px" mb={1}>
+                  <Text fontWeight="700" fontSize="16px" color={TT.black}>{listing.merchant.businessName}</Text>
+                  {listing.merchant.verified && <Icon as={LuCircleCheck} boxSize="16px" color={TT.teal} />}
+                </HStack>
+                <Text fontSize="13px" color={TT.muted} fontWeight="500">
+                  📍 {listing.merchant.neighborhood}, {listing.merchant.district}
+                </Text>
+              </Box>
+            </HStack>
+            
+            {/* Location Details */}
+            <Box bg="white" borderRadius="8px" p={3} border={`1px solid ${TT.black}`} mb={3}>
+              <Text fontSize="11px" fontWeight="700" color={TT.black} mb={2} letterSpacing="0.05em" textTransform="uppercase">📍 Live Location</Text>
+              <VStack align="start" spacing={1}>
+                <HStack spacing={2}>
+                  <Text fontSize="12px" fontWeight="600" color={TT.black}>Merchant:</Text>
+                  <Text fontSize="12px" color={TT.muted} fontFamily="'Courier New',monospace">
+                    {listing.merchant.latitude.toFixed(4)}, {listing.merchant.longitude.toFixed(4)}
+                  </Text>
+                </HStack>
+                <HStack spacing={2}>
+                  <Text fontSize="12px" fontWeight="600" color={TT.black}>Your Location:</Text>
+                  <Text fontSize="12px" color={TT.muted} fontFamily="'Courier New',monospace">
+                    {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                  </Text>
+                </HStack>
+                <HStack spacing={2} pt={1} borderTop={`1px solid #E5E7EB`}>
+                  <Icon as={LuMapPin} boxSize={4} color={TT.teal} />
+                  <Text fontSize="13px" fontWeight="700" color={TT.teal}>
+                    {listing.distanceKm != null ? `${listing.distanceKm.toFixed(1)} km away` : "Nearby"}
+                  </Text>
+                </HStack>
+              </VStack>
+            </Box>
+
+            {/* Contact Info */}
+            <Box>
+              <Text fontSize="11px" fontWeight="700" color={TT.black} mb={2} letterSpacing="0.05em" textTransform="uppercase">Contact</Text>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="13px" color={TT.black}>📱 {listing.merchant.phone}</Text>
+                {listing.merchant.whatsapp && <Text fontSize="13px" color={TT.black}>💬 {listing.merchant.whatsapp}</Text>}
+              </VStack>
+            </Box>
+          </Box>
+
+          {/* Freshness Note */}
+          {listing.freshnessNote && (
+            <Box bg="#FEF3C7" borderRadius="8px" p={3} border={`1px solid #F59E0B`}>
+              <Text fontSize="13px" color="#92400E" fontWeight="600">
+                🕐 {listing.freshnessNote}
+              </Text>
+            </Box>
+          )}
+
           {/* CTAs */}
-          <HStack spacing="10px">
+          <HStack spacing="12px" pb={4}>
             <Box as="a" href={`https://wa.me/${waNum}`} target="_blank" rel="noopener noreferrer"
-              flex={1} h="48px" borderRadius="8px" bg={TT.teal} color={TT.white}
+              flex={1} h="52px" borderRadius="10px" bg={TT.teal} color={TT.white}
               display="flex" alignItems="center" justifyContent="center"
-              fontSize="15px" fontWeight="600" fontFamily="'Inter',sans-serif" textDecoration="none">
-              Message Seller
+              fontSize="15px" fontWeight="700" fontFamily="'Inter',sans-serif" textDecoration="none"
+              _hover={{ bg: "#0D5A5C", transform: "scale(1.02)" }}
+              transition="all 0.2s"
+              border={`2px solid ${TT.teal}`}>
+              💬 Message Seller
             </Box>
             <Box as="a" href={mapsUrl} target="_blank" rel="noopener noreferrer"
-              flex={1} h="48px" borderRadius="8px" bg={TT.black} color={TT.white}
+              flex={1} h="52px" borderRadius="10px" bg={TT.black} color={TT.white}
               display="flex" alignItems="center" justifyContent="center"
-              fontSize="15px" fontWeight="600" fontFamily="'Inter',sans-serif" textDecoration="none">
-              Get Directions
+              fontSize="15px" fontWeight="700" fontFamily="'Inter',sans-serif" textDecoration="none"
+              _hover={{ bg: "#1A1A2E", transform: "scale(1.02)" }}
+              transition="all 0.2s"
+              border={`2px solid ${TT.black}`}>
+              🗺️ Get Directions
             </Box>
           </HStack>
         </Box>
@@ -782,7 +864,7 @@ export function BuyerHome({ onSellClick, onAdminClick }: BuyerHomeProps) {
       <Footer onSellClick={onSellClick} onAdminClick={onAdminClick} />
 
       {/* Product detail sheet (slide-up) */}
-      {selected && <DetailSheet listing={selected} onClose={() => setSelected(null)} />}
+      {selected && <DetailSheet listing={selected} onClose={() => setSelected(null)} userLocation={location} />}
     </Box>
   );
 }
