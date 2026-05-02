@@ -2,9 +2,10 @@ import { useState } from "react";
 import {
   Box,
   Button,
-  HStack,
+  InputGroup,
+  InputRightAddon,
+  Stack,
   Input,
-  Spinner,
   Text,
   VStack
 } from "@chakra-ui/react";
@@ -46,25 +47,51 @@ export function AiConcierge() {
         <Text color="whiteAlpha.800">
           Turn a messy shopping need into a practical next stop, with nearby alternatives and pickup logic.
         </Text>
-        <HStack align="stretch" flexDirection={{ base: "column", md: "row" }}>
-          <Input
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            placeholder="Ask about a product, budget, or neighborhood"
-            bg="whiteAlpha.100"
-            borderColor="whiteAlpha.200"
-            _placeholder={{ color: "whiteAlpha.600" }}
-          />
+        <Stack direction={{ base: "column", md: "row" }}>
+          <InputGroup>
+            <Input
+              value={prompt}
+              onChange={(event) => setPrompt(event.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAsk()}
+              placeholder="Ask about a product, budget, or neighborhood"
+              bg="whiteAlpha.100"
+              borderColor="whiteAlpha.200"
+              _placeholder={{ color: "whiteAlpha.600" }}
+            />
+            <InputRightAddon
+              bg="transparent"
+              borderColor="whiteAlpha.200"
+              p={0}
+              display={{ base: "none", md: "flex" }}
+            >
+              <Button
+                onClick={handleAsk}
+                bg="brand.500"
+                color="white"
+                _hover={{ bg: "brand.600" }}
+                borderLeftRadius={0}
+                isLoading={loading}
+                loadingText="Asking..."
+                h="full"
+                px={6}
+              >
+                Ask concierge
+              </Button>
+            </InputRightAddon>
+          </InputGroup>
           <Button
+            display={{ base: "flex", md: "none" }}
             onClick={handleAsk}
             bg="brand.500"
             color="white"
             _hover={{ bg: "brand.600" }}
-            px={8}
+            isLoading={loading}
+            loadingText="Asking..."
+            w="full"
           >
-            {loading ? <Spinner size="sm" /> : "Ask concierge"}
+            Ask concierge
           </Button>
-        </HStack>
+        </Stack>
         <Box bg="whiteAlpha.100" borderRadius="24px" p={5}>
           <Text color="whiteAlpha.900" lineHeight="1.8">
             {reply}

@@ -10,6 +10,7 @@ import {
   Input,
   Select,
   SimpleGrid,
+  Skeleton,
   Stack,
   Stat,
   StatHelpText,
@@ -83,7 +84,7 @@ function App() {
         <VStack align="stretch" spacing={{ base: 10, md: 16 }}>
           <Box
             borderRadius="36px"
-            bg="linear-gradient(135deg, rgba(249,115,22,0.98), rgba(23,23,23,0.92))"
+            bgGradient="linear(to-br, brand.500, ink.900)"
             color="white"
             overflow="hidden"
             position="relative"
@@ -127,7 +128,7 @@ function App() {
 
               <Box
                 flex="1"
-                bg="rgba(255,255,255,0.08)"
+                bg="whiteAlpha.100"
                 backdropFilter="blur(12px)"
                 borderRadius="28px"
                 p={{ base: 5, md: 7 }}
@@ -220,13 +221,7 @@ function App() {
                 <VStack align="stretch" spacing={5}>
                   {loading
                     ? Array.from({ length: 3 }).map((_, index) => (
-                        <Box
-                          key={index}
-                          h="220px"
-                          borderRadius="28px"
-                          bg="white"
-                          border="1px solid rgba(23, 23, 23, 0.06)"
-                        />
+                        <Skeleton key={index} h="220px" borderRadius="28px" />
                       ))
                     : items.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
                 </VStack>

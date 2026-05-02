@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   HStack,
+  Icon,
   SimpleGrid,
   Text,
   VStack
@@ -90,7 +91,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
               alignItems="center"
               gap={1}
             >
-              <Box as={HiOutlineSparkles} />
+              <Icon as={HiOutlineSparkles} />
               {listing.freshnessNote}
             </Badge>
           ) : null}
