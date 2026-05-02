@@ -6,6 +6,7 @@ import {
   LuCircleCheck, LuMapPin, LuNavigation, LuSearch, LuUser, LuX, LuWholeWord,
 } from "react-icons/lu";
 import { HiPhoto } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
 import { AiConcierge } from "../components/AiConcierge";
 import { fetchListings } from "../lib/api";
 import { TT } from "../lib/tokens";
@@ -57,10 +58,13 @@ function fmt(rwf: number) { return `${rwf.toLocaleString()} RWF`; }
 function Header({
   onSellClick, onAdminClick, location, locationReady, search, onSearch,
 }: {
-  onSellClick: () => void; onAdminClick: () => void;
+  onSellClick?: () => void; onAdminClick?: () => void;
   location: UserLocation; locationReady: boolean;
   search: string; onSearch: (v: string) => void;
 }) {
+  const navigate = useNavigate();
+  const handleSellClick = onSellClick ? onSellClick : () => navigate("/login");
+  const handleAdminClick = onAdminClick ? onAdminClick : () => navigate("/login");
   const [activeNav, setActiveNav] = useState("home");
   return (
     <Box
@@ -130,12 +134,12 @@ function Header({
       <HStack spacing="8px" flexShrink={0}>
         <Box as="button" w="38px" h="38px" borderRadius="999px" border={`1px solid ${TT.black}`}
           display="flex" alignItems="center" justifyContent="center" cursor="pointer" bg={TT.white}
-          onClick={onSellClick} title="Seller login" style={{outline:"none"}}>
+          onClick={handleSellClick} title="Seller login" style={{outline:"none"}}>
           <Icon as={LuUser} boxSize="18px" color={TT.black} />
         </Box>
         <Box as="button" px="10px" h="32px" borderRadius="6px" border={`1px solid ${TT.black}`}
           display={{ base: "none", md: "flex" }} alignItems="center" justifyContent="center"
-          cursor="pointer" bg={TT.white} onClick={onAdminClick} fontSize="12px" fontWeight="600"
+          cursor="pointer" bg={TT.white} onClick={handleAdminClick} fontSize="12px" fontWeight="600"
           color={TT.black} fontFamily="'Inter',sans-serif" style={{outline:"none"}}>
           Admin
         </Box>
@@ -148,9 +152,11 @@ function Header({
 function HeroBand({
   onBrowse, onSellClick, categoryCounts,
 }: {
-  onBrowse: () => void; onSellClick: () => void;
+  onBrowse: () => void; onSellClick?: () => void;
   categoryCounts: Record<string, number>;
 }) {
+  const navigate = useNavigate();
+  const handleSellClick = onSellClick ? onSellClick : () => navigate("/login");
   const chips = [
     { label: "Groceries",   key: "GROCERIES"   },
     { label: "Pharmacy",    key: "PHARMACY"     },
@@ -186,7 +192,7 @@ function HeroBand({
           </Box>
           <Box as="button" h="44px" px="20px" borderRadius="8px" bg="transparent" color={TT.white}
             border={`1px solid ${TT.white}`} fontFamily="'Inter',sans-serif" fontWeight="600" fontSize="15px"
-            cursor="pointer" onClick={onSellClick} style={{outline:"none"}}>
+            cursor="pointer" onClick={handleSellClick} style={{outline:"none"}}>
             Sell with us
           </Box>
         </HStack>
@@ -694,7 +700,10 @@ function MapPanel({ listings, userLocation }: { listings: Listing[]; userLocatio
 }
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
-function Footer({ onSellClick, onAdminClick }: { onSellClick: () => void; onAdminClick: () => void }) {
+function Footer({ onSellClick, onAdminClick }: { onSellClick?: () => void; onAdminClick?: () => void }) {
+  const navigate = useNavigate();
+  const handleSellClick = onSellClick ? onSellClick : () => navigate("/login");
+  const handleAdminClick = onAdminClick ? onAdminClick : () => navigate("/login");
   const cols = [
     { h: "Buyers",  links: [["Browse","#"],["Verified Sellers","#"],["Help Center","#"]] },
     { h: "Sellers", links: [["Start Selling","sell"],["Pricing","#"],["Seller Guide","#"]] },
@@ -722,8 +731,8 @@ function Footer({ onSellClick, onAdminClick }: { onSellClick: () => void; onAdmi
                 <Box key={label} as="a" href={href === "#" ? "#" : "#"} fontSize="13px" color={TT.white}
                   textDecoration="none" cursor="pointer" _hover={{ textDecoration: "underline" }}
                   onClick={
-                    href === "sell" ? (e: React.MouseEvent) => { e.preventDefault(); onSellClick(); } :
-                    href === "admin" ? (e: React.MouseEvent) => { e.preventDefault(); onAdminClick(); } :
+                    href === "sell" ? (e: React.MouseEvent) => { e.preventDefault(); handleSellClick(); } :
+                    href === "admin" ? (e: React.MouseEvent) => { e.preventDefault(); handleAdminClick(); } :
                     undefined
                   }>{label}</Box>
               ))}
@@ -741,9 +750,10 @@ function Footer({ onSellClick, onAdminClick }: { onSellClick: () => void; onAdmi
 }
 
 /* ── BuyerHome ────────────────────────────────────────────────────────────── */
-type BuyerHomeProps = { onSellClick: () => void; onAdminClick: () => void };
+type BuyerHomeProps = { onSellClick?: () => void; onAdminClick?: () => void };
 
-export function BuyerHome({ onSellClick, onAdminClick }: BuyerHomeProps) {
+export function BuyerHome({ onSellClick, onAdminClick }: BuyerHomeProps = {}) {
+  const navigate = useNavigate();
   const browseRef = useRef<HTMLDivElement>(null);
 
   const [search, setSearch]           = useState("");
