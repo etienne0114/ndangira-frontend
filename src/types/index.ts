@@ -73,3 +73,22 @@ export type AiResponse = {
   }>;
   conversationId: string;
 };
+
+export type NotificationType =
+  | "SELLER_APPROVED"
+  | "SELLER_REJECTED"
+  | "LISTING_CREATED"
+  | "LISTING_LOW_STOCK"
+  | "NEW_SELLER_APPLICATION"
+  | "SYSTEM_ANNOUNCEMENT";
+
+export type Notification = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+};

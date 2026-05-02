@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { NotificationIcon } from "./NotificationIcon";
 
 const roleBadgeColor: Record<string, string> = {
   ADMIN: "red",
@@ -41,32 +42,35 @@ export function Navbar() {
 
           <HStack spacing={3}>
             {user ? (
-              <Menu>
-                <MenuButton as={Button} variant="ghost" p={1}>
-                  <HStack spacing={2}>
-                    <Avatar size="sm" name={user.name} />
-                    <Box display={{ base: "none", md: "block" }} textAlign="left">
-                      <Text fontSize="sm" fontWeight="700" lineHeight="1.2">
-                        {user.name}
-                      </Text>
-                      <Badge fontSize="xs" colorScheme={roleBadgeColor[user.role]} borderRadius="full">
-                        {user.role.toLowerCase()}
-                      </Badge>
-                    </Box>
-                  </HStack>
-                </MenuButton>
-                <MenuList>
-                  {user.role === "ADMIN" && (
-                    <MenuItem onClick={() => navigate("/admin")}>Admin Dashboard</MenuItem>
-                  )}
-                  {user.role === "SELLER" && (
-                    <MenuItem onClick={() => navigate("/seller")}>Seller Dashboard</MenuItem>
-                  )}
-                  <MenuItem onClick={handleLogout} color="red.500">
-                    Sign out
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+              <>
+                <NotificationIcon />
+                <Menu>
+                  <MenuButton as={Button} variant="ghost" p={1}>
+                    <HStack spacing={2}>
+                      <Avatar size="sm" name={user.name} />
+                      <Box display={{ base: "none", md: "block" }} textAlign="left">
+                        <Text fontSize="sm" fontWeight="700" lineHeight="1.2">
+                          {user.name}
+                        </Text>
+                        <Badge fontSize="xs" colorScheme={roleBadgeColor[user.role]} borderRadius="full">
+                          {user.role.toLowerCase()}
+                        </Badge>
+                      </Box>
+                    </HStack>
+                  </MenuButton>
+                  <MenuList>
+                    {user.role === "ADMIN" && (
+                      <MenuItem onClick={() => navigate("/admin")}>Admin Dashboard</MenuItem>
+                    )}
+                    {user.role === "SELLER" && (
+                      <MenuItem onClick={() => navigate("/seller")}>Seller Dashboard</MenuItem>
+                    )}
+                    <MenuItem onClick={handleLogout} color="red.500">
+                      Sign out
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </>
             ) : (
               <>
                 <Button as={Link} to="/login" variant="ghost" size="sm">
