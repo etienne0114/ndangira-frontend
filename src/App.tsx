@@ -3,8 +3,10 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
+  AlertTitle,
   Badge,
   Box,
+  Checkbox,
   Button,
   Container,
   Grid,
@@ -13,6 +15,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputLeftAddon,
   Select,
   SimpleGrid,
   Skeleton,
@@ -30,6 +33,23 @@ import { ListingCard } from "./components/ListingCard";
 import { AiConcierge } from "./components/AiConcierge";
 import { fetchCategories, fetchListings } from "./lib/api";
 import type { Category, Listing } from "./types";
+import { ArrowForwardIcon, RepeatIcon } from "@chakra-ui/icons";
+import { SectionHeading } from "./components/SectionHeading";
+import { ListingCard } from "./components/ListingCard";
+import { AiConcierge } from "./components/AiConcierge";
+import { fetchListings } from "./lib/api";
+import type { Listing, UserLocation } from "./types";
+
+const categories = [
+  { label: "All categories", value: "" },
+  { label: "Groceries", value: "GROCERIES" },
+  { label: "Restaurants", value: "RESTAURANTS" },
+  { label: "Fashion", value: "FASHION" },
+  { label: "Electronics", value: "ELECTRONICS" },
+  { label: "Home", value: "HOME" },
+  { label: "Health", value: "HEALTH" },
+  { label: "Services", value: "SERVICES" }
+];
 
 const featureBlocks = [
   {
@@ -71,9 +91,65 @@ function App() {
       .catch(() => setCategoriesError(true))
       .finally(() => setCategoriesLoading(false));
   }, []);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [maxDistanceKm, setMaxDistanceKm] = useState("5");
+  const [sort, setSort] = useState("distance");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [items, setItems] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [liveData, setLiveData] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [location, setLocation] = useState<UserLocation | null>(null);
+  const [locationLabel, setLocationLabel] = useState("Requesting your location...");
+  const [locationReady, setLocationReady] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(true);
+
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      setLocationLoading(false);
+      setLocationReady(false);
+      setLocationLabel("Browser location is unavailable. Using Kigali center.");
+      setLocation({ latitude: -1.9441, longitude: 30.0619 });
+      return;
+    }
+
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
+        setLocationReady(true);
+        setLocationLoading(false);
+        setLocationLabel(`Live location enabled (${Math.round(position.coords.accuracy)}m accuracy).`);
+      },
+      () => {
+        setLocation({ latitude: -1.9441, longitude: 30.0619 });
+        setLocationReady(false);
+        setLocationLoading(false);
+        setLocationLabel("Location permission was not granted. Showing Kigali-center results instead.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  }
 
   // Reload listings whenever submitted query or category changes
   useEffect(() => {
+    requestLocation();
+  }, []);
+
+  useEffect(() => {
+    if (!location) {
+      return;
+    }
+
     const params = new URLSearchParams();
     if (submittedQuery) params.set("q", submittedQuery);
     if (category) params.set("category", category);
@@ -96,8 +172,34 @@ function App() {
   function handleSearch() {
     setSubmittedQuery(inputValue.trim());
   }
+    if (query) {
+      params.set("q", query);
+    }
+    if (category) {
+      params.set("category", category);
+    }
+    params.set("lat", String(location.latitude));
+    params.set("lng", String(location.longitude));
+    params.set("sort", sort);
+    params.set("limit", "20");
+    params.set("maxDistanceKm", maxDistanceKm);
+    if (verifiedOnly) {
+      params.set("verifiedOnly", "true");
+    }
+
+    setLoading(true);
+    setErrorMessage(undefined);
+    fetchListings(params)
+      .then((data) => {
+        setItems(data.items);
+        setLiveData(data.source === "live");
+        setErrorMessage(data.errorMessage);
+      })
+      .finally(() => setLoading(false));
+  }, [query, category, maxDistanceKm, sort, verifiedOnly, location]);
 
   const featured = useMemo(() => items.filter((item) => item.isFeatured), [items]);
+  const nearestListing = items[0];
 
   return (
     <Box minH="100vh" bgGradient="linear(to-b, #f8f3ea 0%, #fffdf9 45%, #f2ebde 100%)">
@@ -125,6 +227,14 @@ function App() {
                   Ndangira helps Kigali shoppers discover real nearby products and services, while
                   local businesses turn current location into a live digital storefront.
                 </Text>
+                <HStack spacing={3} flexWrap="wrap">
+                  <Badge bg={locationReady ? "green.500" : "orange.500"} color="white" px={4} py={2} borderRadius="full">
+                    {locationLoading ? "Detecting your location..." : locationLabel}
+                  </Badge>
+                  <Badge bg={liveData ? "whiteAlpha.200" : "red.500"} color="white" px={4} py={2} borderRadius="full">
+                    {liveData ? "Live marketplace feed" : "Fallback demo data"}
+                  </Badge>
+                </HStack>
                 <HStack spacing={4} flexWrap="wrap">
                   <Button
                     rightIcon={<ArrowForwardIcon />}
@@ -137,6 +247,9 @@ function App() {
                     Explore nearby listings
                   </Button>
                   <Button
+                    leftIcon={<RepeatIcon />}
+                    onClick={requestLocation}
+                    isLoading={locationLoading}
                     variant="outline"
                     size="lg"
                     borderRadius="full"
@@ -158,24 +271,27 @@ function App() {
               >
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
                   <Stat bg="whiteAlpha.100" borderRadius="24px" p={4}>
-                    <StatLabel color="whiteAlpha.700">Search lift</StatLabel>
-                    <StatNumber>3x</StatNumber>
+                    <StatLabel color="whiteAlpha.700">Nearest now</StatLabel>
+                    <StatNumber>{nearestListing?.distanceKm?.toFixed(1) ?? "0.0"} km</StatNumber>
                     <StatHelpText color="whiteAlpha.700">
                       "Near me" intent is growing and Ndangira is built directly for it.
+                      {nearestListing
+                        ? `${nearestListing.title} in ${nearestListing.merchant.neighborhood}`
+                        : "Waiting for nearby results"}
                     </StatHelpText>
                   </Stat>
                   <Stat bg="whiteAlpha.100" borderRadius="24px" p={4}>
-                    <StatLabel color="whiteAlpha.700">Buyer confidence</StatLabel>
-                    <StatNumber>Live</StatNumber>
+                    <StatLabel color="whiteAlpha.700">Location mode</StatLabel>
+                    <StatNumber>{locationReady ? "Auto" : "Fallback"}</StatNumber>
                     <StatHelpText color="whiteAlpha.700">
-                      Freshness notes and seller signals reduce wasted trips.
+                      Search follows the user’s position when permission is granted.
                     </StatHelpText>
                   </Stat>
                   <Stat bg="whiteAlpha.100" borderRadius="24px" p={4}>
-                    <StatLabel color="whiteAlpha.700">Business impact</StatLabel>
-                    <StatNumber>Local-first</StatNumber>
+                    <StatLabel color="whiteAlpha.700">Listings nearby</StatLabel>
+                    <StatNumber>{items.length}</StatNumber>
                     <StatHelpText color="whiteAlpha.700">
-                      Small businesses get discovered by people already nearby.
+                      Filtered by what the shopper wants right now.
                     </StatHelpText>
                   </Stat>
                 </SimpleGrid>
@@ -207,10 +323,19 @@ function App() {
             <SectionHeading
               eyebrow="Discovery Engine"
               title="Neighborhood-first search"
-              description="A stronger, more competitive discovery experience with location-aware filters, urgency cues, and quick seller contact."
+              description="Search starts from the shopper’s current position automatically, then ranks the closest relevant results first."
             />
 
             {/* Search bar */}
+            {errorMessage ? (
+              <Alert status={liveData ? "info" : "warning"} borderRadius="24px" bg={liveData ? "blue.50" : "orange.50"}>
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>{liveData ? "Marketplace update" : "Live data unavailable"}</AlertTitle>
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Box>
+              </Alert>
+            ) : null}
             <Box
               bg="white"
               borderRadius="30px"
@@ -260,6 +385,17 @@ function App() {
                 <Button
                   onClick={handleSearch}
                   leftIcon={<SearchIcon />}
+              <SimpleGrid columns={{ base: 1, md: 2, xl: 5 }} spacing={4}>
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search tomatoes, tailoring, speaker, salon..."
+                  borderRadius="full"
+                  h="56px"
+                />
+                <Select
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value)}
                   borderRadius="full"
                   h="56px"
                   bg="brand.500"
@@ -270,6 +406,45 @@ function App() {
                 >
                   Search nearby
                 </Button>
+                  {categories.map((option) => (
+                    <option key={option.label} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <InputGroup h="56px">
+                  <InputLeftAddon h="56px" borderRadius="full" borderRight="0">
+                    Radius
+                  </InputLeftAddon>
+                  <Select
+                    value={maxDistanceKm}
+                    onChange={(event) => setMaxDistanceKm(event.target.value)}
+                    h="56px"
+                    borderLeftRadius="0"
+                    borderRightRadius="full"
+                  >
+                    <option value="1">1 km</option>
+                    <option value="3">3 km</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                  </Select>
+                </InputGroup>
+                <Select value={sort} onChange={(event) => setSort(event.target.value)} borderRadius="full" h="56px">
+                  <option value="distance">Closest first</option>
+                  <option value="price-asc">Lowest price</option>
+                  <option value="price-desc">Highest price</option>
+                  <option value="fresh">Freshest</option>
+                  <option value="newest">Newest</option>
+                </Select>
+                <VStack align="start" justify="center" bg="sand.100" borderRadius="24px" px={5} py={3}>
+                  <Checkbox isChecked={verifiedOnly} onChange={(event) => setVerifiedOnly(event.target.checked)} colorScheme="orange">
+                    Verified merchants only
+                  </Checkbox>
+                  <Text fontSize="sm" color="ink.700">
+                    Focus on trusted sellers near the shopper.
+                  </Text>
+                </VStack>
               </SimpleGrid>
             </Box>
 
@@ -312,6 +487,22 @@ function App() {
                   {/* Results */}
                   {!listingsLoading &&
                     items.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
+                  {loading
+                    ? Array.from({ length: 3 }).map((_, index) => (
+                        <Skeleton key={index} h="220px" borderRadius="28px" />
+                      ))
+                    : items.length > 0
+                      ? items.map((listing) => <ListingCard key={listing.id} listing={listing} />)
+                      : (
+                        <Box bg="white" borderRadius="28px" p={8} border="1px solid rgba(23, 23, 23, 0.06)">
+                          <Text fontSize="xl" fontWeight="800" mb={2}>
+                            No nearby matches yet
+                          </Text>
+                          <Text color="ink.700">
+                            Try a broader search, a larger radius, or switch off the verified-only filter.
+                          </Text>
+                        </Box>
+                      )}
                 </VStack>
               </GridItem>
 
@@ -326,6 +517,8 @@ function App() {
                     p={6}
                     border="1px solid rgba(23, 23, 23, 0.06)"
                   >
+                  <AiConcierge location={location} locationReady={locationReady} />
+                  <Box bg="white" borderRadius="28px" p={6} border="1px solid rgba(23, 23, 23, 0.06)">
                     <Text fontSize="lg" fontWeight="800" mb={4}>
                       Featured today
                     </Text>
