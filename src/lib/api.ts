@@ -1,7 +1,64 @@
 import { fallbackListings } from "./mockData";
-import type { AiResponse, ListingsQueryResult } from "../types";
+import type {
+  AiResponse,
+  AuthResponse,
+  ListingsQueryResult,
+  MerchantDashboardResponse
+} from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+type RegisterMerchantInput = {
+  businessName: string;
+  ownerName: string;
+  email: string;
+  password: string;
+  phone: string;
+  whatsapp?: string;
+  businessType: string;
+  neighborhood: string;
+  district: string;
+  addressLine?: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+  serviceRadiusKm: number;
+};
+
+type LoginInput = {
+  email: string;
+  password: string;
+};
+
+type UpdateLocationInput = {
+  latitude: number;
+  longitude: number;
+  neighborhood: string;
+  district: string;
+  addressLine?: string;
+  serviceRadiusKm?: number;
+};
+
+type CreateListingInput = {
+  title: string;
+  description: string;
+  category: string;
+  priceRwf: number;
+  unitLabel: string;
+  inventoryStatus: string;
+  freshnessNote?: string;
+  imageUrl?: string;
+  tags: string[];
+  isFeatured?: boolean;
+};
+
+async function parseJson<T>(response: Response): Promise<T> {
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.message || "Request failed.");
+  }
+  return payload as T;
+}
 
 export async function fetchListings(searchParams: URLSearchParams) {
   try {
@@ -67,4 +124,64 @@ export async function askConcierge(message: string, lat?: number, lng?: number, 
       live: false
     };
   }
+}
+
+export async function registerMerchant(input: RegisterMerchantInput) {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(input)
+  });
+
+  return parseJson<AuthResponse>(response);
+}
+
+export async function loginMerchant(input: LoginInput) {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(input)
+  });
+
+  return parseJson<AuthResponse>(response);
+}
+
+export async function fetchMerchantDashboard(token: string) {
+  const response = await fetch(`${API_URL}/api/merchant/dashboard`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return parseJson<MerchantDashboardResponse>(response);
+}
+
+export async function updateMerchantLocation(token: string, input: UpdateLocationInput) {
+  const response = await fetch(`${API_URL}/api/merchant/location`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(input)
+  });
+
+  return parseJson<{ merchant: AuthResponse["merchant"] }>(response);
+}
+
+export async function createMerchantListing(token: string, input: CreateListingInput) {
+  const response = await fetch(`${API_URL}/api/merchant/listings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(input)
+  });
+
+  return parseJson<{ listing: MerchantDashboardResponse["listings"][number] }>(response);
 }
