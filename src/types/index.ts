@@ -1,5 +1,17 @@
 export type InventoryStatus = "IN_STOCK" | "LOW_STOCK" | "MADE_TO_ORDER";
 
+export type ListingCategory =
+  | "GROCERIES"
+  | "RESTAURANTS"
+  | "FASHION"
+  | "ELECTRONICS"
+  | "HOME"
+  | "HEALTH"
+  | "SERVICES"
+  | "SUPERMARKET"
+  | "PHARMACY"
+  | "HOUSING";
+
 export type Category = {
   id: string;
   name: string;
@@ -36,6 +48,8 @@ export type Listing = {
     whatsapp?: string | null;
     neighborhood: string;
     district: string;
+    latitude: number;
+    longitude: number;
     verified: boolean;
   };
 };
@@ -91,4 +105,46 @@ export type Notification = {
   read: boolean;
   metadata?: Record<string, unknown>;
   createdAt: string;
+};
+
+export type Merchant = {
+  id: string;
+  businessName: string;
+  ownerName: string;
+  email: string;
+  phone: string;
+  whatsapp?: string | null;
+  businessType: ListingCategory;
+  neighborhood: string;
+  district: string;
+  addressLine?: string | null;
+  description?: string | null;
+  latitude: number;
+  longitude: number;
+  serviceRadiusKm: number;
+  verified: boolean;
+  aiEnabled: boolean;
+};
+
+export type MerchantDashboardResponse = {
+  merchant: Merchant;
+  listings: Array<{
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    priceRwf: number;
+    unitLabel: string;
+    inventoryStatus: InventoryStatus;
+    freshnessNote?: string | null;
+    imageUrl?: string | null;
+    tags: string[];
+    isFeatured: boolean;
+  }>;
+  metrics: {
+    totalListings: number;
+    inStock: number;
+    lowStock: number;
+    featured: number;
+  };
 };
