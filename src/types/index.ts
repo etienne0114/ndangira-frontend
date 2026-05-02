@@ -35,6 +35,40 @@ export type Listing = {
 };
 
 export type ListingsResponse = {
-  count: number;
   items: Listing[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+};
+
+export type ListingsQueryResult = ListingsResponse & {
+  source: "live" | "fallback";
+  errorMessage?: string;
+};
+
+export type UserLocation = {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+};
+
+export type AiResponse = {
+  reply: string;
+  suggestions: string[];
+  relatedListings: Array<{
+    id: string;
+    title: string;
+    priceRwf: number;
+    merchant: string;
+    neighborhood: string;
+    distance: number | null;
+    category: ListingCategory;
+    unitLabel: string;
+    inventoryStatus: InventoryStatus;
+    freshnessNote: string | null;
+    verified: boolean;
+  }>;
+  conversationId: string;
+  live?: boolean;
 };
